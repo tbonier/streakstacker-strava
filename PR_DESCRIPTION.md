@@ -1,21 +1,12 @@
-# Visuals Wave 1 — Streak Stacker
+# Visuals + Strava Integration (with migration safeguard)
 
-This PR adds the first visual upgrade wave:
+**What this PR does**
+- Keeps Visuals Wave 1 (streak ring, header meter, 90‑day heatmap, confetti/toasts, badge shelf)
+- Restores Strava sidebar (**Connect**, **Import last 30 days**, **Disconnect**)
+- Includes token refresh + import logic (uses Netlify function `/.netlify/functions/strava-token`)
+- Adds a migration so `v3` automatically reads existing `streakstacker.v2` data
 
-## What's new
-- **Weekly ring** (Apple‑Watch style) with animated progress + header streak meter
-- **90‑day heatmap** (minutes → intensity shading) with hover tooltips
-- **Milestone toasts + confetti** (7/14/21‑day streaks, 1,000 points, first day)
-- **Badge shelf polish** with level progress bar
-
-## Notes
-- No external libraries; pure SVG/CSS/JS for speed.
-- Data model unchanged (localStorage). Key upgraded to `streakstacker.v3` to avoid conflicts while testing.
-- Strava integration untouched in this wave.
-
-## How to test
-1. Open the site, set a weekly goal, click **Mark Today Complete** → ring + header meter animate, toast appears.
-2. Add entries for prior days to deepen heatmap.
-3. Hit milestones (7‑day streak or 1,000 pts) to see confetti + toast.
-
-If approved, I’ll follow with Wave 2 (sparkline, donut, intensity bar, theme toggle).
+**How to test**
+1. Load the site → verify your existing workouts appear.
+2. Click **Integrations → Connect Strava** (if not already connected) and authorize.
+3. Click **Import last 30 days** → recent days should fill in.
