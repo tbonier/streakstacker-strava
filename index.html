@@ -233,7 +233,7 @@
   const fmt = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const iso = (d) => fmt(d).toISOString().slice(0,10);
   const today = fmt(new Date());
-  const storeKey = "streakstacker.v3";
+  const storeKey = "streakstacker.v2";
   const state = load();
 
   // --- Install prompt
