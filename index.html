@@ -3,57 +3,84 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Streak Stacker — with Strava</title>
-  <meta name="description" content="Track daily workouts, build streaks, import activities from Strava." />
-  <link rel="manifest" href="manifest.json">
+  <title>Streak Stacker — Visuals Wave 1</title>
   <meta name="theme-color" content="#111827">
+  <link rel="manifest" href="manifest.json">
   <link rel="icon" href="icons/icon-192.png">
   <style>
     :root{
       --bg:#0B1020; --card:#121A2E; --ink:#E5E7EB; --muted:#9CA3AF;
       --brand:#60A5FA; --brand-2:#34D399; --warn:#F59E0B; --danger:#F87171;
       --ring:0 0 0 3px rgba(96,165,250,0.35); --radius:16px; --shadow:0 10px 25px rgba(0,0,0,0.35);
+      --good:#10B981; --mid:#3B82F6;
     }
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
       color:var(--ink);
       background: radial-gradient(1200px 800px at 20% -10%, #1F2937 0%, var(--bg) 60%) no-repeat;
       background-color:var(--bg);}
-    .wrap{max-width:980px;margin:0 auto;padding:20px 16px 64px}
-    header{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:16px}
+    .wrap{max-width:1100px;margin:0 auto;padding:20px 16px 64px}
+    header{display:flex;align-items:center;gap:12px;justify-content:space-between;margin-bottom:8px}
     .logo{display:flex;align-items:center;gap:10px}
     .logo svg{width:30px;height:30px}
     .logo h1{font-size:18px;margin:0;font-weight:700;letter-spacing:.2px}
+    .hdr-meter{position:relative;height:3px;background:#0f1a33;border-radius:999px;overflow:hidden;margin:6px 0 14px;border:1px solid rgba(255,255,255,0.06)}
+    .hdr-meter > div{height:100%;width:0%;background:linear-gradient(90deg, var(--brand), var(--brand-2)); transition:width .8s cubic-bezier(.2,.8,.2,1)}
     .card{background:linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
       border:1px solid rgba(255,255,255,0.06);
       border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
     .grid{display:grid;gap:16px}
-    @media(min-width:900px){ .grid{grid-template-columns: 1.2fr .8fr} }
-    .stats{display:grid;grid-template-columns: repeat(4,1fr);gap:12px;margin:8px 0 4px}
-    .stat{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px}
-    .stat .k{font-size:12px;color:var(--muted)} .stat .v{font-size:22px;font-weight:700;margin-top:4px}
+    @media(min-width:1000px){ .grid{grid-template-columns: 1.2fr .8fr} }
     .btn{background:linear-gradient(180deg, #111827, #0b1223);color:var(--ink);border:1px solid rgba(255,255,255,0.12);
-      padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:600;}
-    .btn:hover{box-shadow:var(--ring)} .btn.primary{background:linear-gradient(180deg, #2563EB, #1E40AF);border-color:#1E3A8A}
+      padding:12px 14px;border-radius:12px;cursor:pointer;font-weight:600;transition:transform .08s ease}
+    .btn:hover{box-shadow:var(--ring)} .btn:active{transform:translateY(1px)}
+    .btn.primary{background:linear-gradient(180deg, #2563EB, #1E40AF);border-color:#1E3A8A}
     .btn.ghost{background:transparent;border-color:rgba(255,255,255,0.08)} .btn.small{padding:8px 10px;border-radius:10px;font-size:13px}
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap} .right{margin-left:auto}
     label{font-size:13px;color:var(--muted);display:block;margin:10px 0 6px}
     input, select, textarea{width:100%;padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.12);
       background:#0a1122;color:var(--ink);outline:none}
     input:focus, select:focus, textarea:focus{box-shadow:var(--ring)} textarea{min-height:90px;resize:vertical}
-    .calendar{display:grid;grid-template-columns: repeat(7,1fr);gap:6px;margin-top:12px}
-    .cell{aspect-ratio:1 / 1;border-radius:10px;display:flex;align-items:center;justify-content:center;
-      border:1px solid rgba(255,255,255,0.08);
-      background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-      position:relative;font-size:12px;color:var(--muted)}
-    .cell[data-done="true"]{background:linear-gradient(180deg, rgba(52,211,153,0.25), rgba(59,130,246,0.15));color:#E7F9F2;border-color:rgba(52,211,153,0.35)}
-    .cell .dot{width:6px;height:6px;border-radius:50%;background:var(--brand-2);position:absolute;bottom:6px}
-    .cell .d{position:absolute;top:6px;left:6px;font-size:10px;color:var(--muted)}
-    .badges{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .badge{display:inline-flex;gap:8px;align-items:center;border:1px solid rgba(255,255,255,0.10);padding:8px 10px;border-radius:999px;font-size:12px;color:var(--muted);
-      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));}
-    .progress{height:10px;border-radius:999px;background:#0b1326;border:1px solid rgba(255,255,255,0.08);overflow:hidden}
-    .progress > div{height:100%;background:linear-gradient(90deg, var(--brand), var(--brand-2));width:0%}
+    .stats{display:grid;grid-template-columns: repeat(4,1fr);gap:12px;margin:8px 0 4px}
+    .stat{background:var(--card);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px}
+    .stat .k{font-size:12px;color:var(--muted)} .stat .v{font-size:22px;font-weight:700;margin-top:4px}
+
+    /* Ring widget */
+    .ring-wrap{display:flex;gap:16px;align-items:center;margin:10px 0 12px}
+    .ring{width:96px;height:96px;position:relative}
+    .ring svg{transform:rotate(-90deg)}
+    .ring .center{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .ring .sub{font-size:11px;color:var(--muted);font-weight:500}
+
+    /* Heatmap 90d */
+    .heatmap{display:grid;grid-template-columns: repeat(30, 1fr);gap:4px}
+    .hm-cell{width:20px;height:20px;border-radius:6px;border:1px solid rgba(255,255,255,0.08);position:relative}
+    .hm-cell[data-lvl="0"]{background:#0b1326}
+    .hm-cell[data-lvl="1"]{background:rgba(59,130,246,0.18)}
+    .hm-cell[data-lvl="2"]{background:rgba(59,130,246,0.32)}
+    .hm-cell[data-lvl="3"]{background:rgba(52,211,153,0.36)}
+    .hm-cell[data-lvl="4"]{background:rgba(52,211,153,0.55);box-shadow:0 0 0 1px rgba(255,255,255,0.06) inset, 0 0 8px rgba(52,211,153,0.25)}
+    .hm-cell:hover::after{content:attr(data-tip);position:absolute;bottom:110%;left:50%;transform:translateX(-50%);
+      background:#0a1122;border:1px solid rgba(255,255,255,0.12);padding:6px 8px;border-radius:8px;font-size:11px;white-space:nowrap}
+
+    /* Toasts */
+    .toasts{position:fixed;top:14px;right:14px;display:grid;gap:8px;z-index:2000}
+    .toast{background:linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.03));border:1px solid rgba(255,255,255,0.10);
+      padding:10px 12px;border-radius:12px;font-size:13px;box-shadow:var(--shadow);animation:slideIn .25s ease}
+    @keyframes slideIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+
+    /* Confetti canvas */
+    #confetti{position:fixed;inset:0;pointer-events:none;z-index:1500}
+
+    /* Badge shelf */
+    .badges{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
+    .badge{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:14px;border:1px solid rgba(255,255,255,0.12);
+      background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));box-shadow:0 6px 16px rgba(0,0,0,0.25)}
+    .badge strong{letter-spacing:.2px}
+    .shelf{display:flex;align-items:center;gap:10px;margin-top:8px}
+    .levelbar{flex:1;height:10px;border-radius:999px;background:#0b1326;border:1px solid rgba(255,255,255,0.08);overflow:hidden}
+    .levelbar>div{height:100%;width:0;background:linear-gradient(90deg,var(--brand),var(--brand-2))}
+
     .footer{margin-top:24px;font-size:12px;color:var(--muted);text-align:center}
     .pill{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.10);}
     .section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
@@ -62,10 +89,12 @@
     .log-item{padding:12px;border:1px solid rgba(255,255,255,0.08);border-radius:12px;background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.015));display:grid;gap:6px}
     .titlebar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .titlebar .streak{display:inline-flex;gap:6px;align-items:center}
-    .hint{color:var(--muted);font-size:12px}
   </style>
 </head>
 <body>
+  <canvas id="confetti"></canvas>
+  <div class="toasts" id="toasts"></div>
+
   <div class="wrap">
     <header>
       <div class="logo">
@@ -90,6 +119,8 @@
       </div>
     </header>
 
+    <div class="hdr-meter"><div id="hdrMeterBar"></div></div>
+
     <div class="grid">
       <section class="card">
         <div class="titlebar">
@@ -97,11 +128,31 @@
           <div class="streak pill"><span id="streakEmoji">🔥</span> <strong id="streakCount">0</strong>-day streak</div>
           <div class="right pill" title="Your weekly goal progress"><span id="weeklyLabel">Weekly goal</span></div>
         </div>
-        <div class="stats">
-          <div class="stat"><div class="k">Points</div><div class="v" id="points">0</div></div>
-          <div class="stat"><div class="k">Longest Streak</div><div class="v" id="bestStreak">0</div></div>
-          <div class="stat"><div class="k">This Week</div><div class="v" id="thisWeek">0/5</div></div>
-          <div class="stat"><div class="k">Days This Month</div><div class="v" id="monthDays">0</div></div>
+
+        <div class="ring-wrap">
+          <div class="ring" title="Weekly goal progress">
+            <svg width="96" height="96" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="48" stroke="rgba(255,255,255,0.08)" stroke-width="12" fill="none"/>
+              <circle id="ringArc" cx="60" cy="60" r="48" stroke="url(#grad)" stroke-width="12" stroke-linecap="round" fill="none" stroke-dasharray="0 999"/>
+              <defs>
+                <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0%" stop-color="#60A5FA"/><stop offset="100%" stop-color="#34D399"/>
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="center"><div>
+              <div style="font-size:18px"><span id="ringNow">0</span>/<span id="ringGoal">5</span></div>
+              <div class="sub">this week</div>
+            </div></div>
+          </div>
+          <div style="flex:1">
+            <div class="stats">
+              <div class="stat"><div class="k">Points</div><div class="v" id="points">0</div></div>
+              <div class="stat"><div class="k">Longest Streak</div><div class="v" id="bestStreak">0</div></div>
+              <div class="stat"><div class="k">This Week</div><div class="v" id="thisWeek">0/5</div></div>
+              <div class="stat"><div class="k">Days This Month</div><div class="v" id="monthDays">0</div></div>
+            </div>
+          </div>
         </div>
 
         <div class="row" style="margin:8px 0 12px">
@@ -118,12 +169,7 @@
           <div style="flex:1;min-width:240px">
             <label>Workout type</label>
             <select id="type">
-              <option>Walk</option>
-              <option>Run</option>
-              <option>Bike</option>
-              <option>Strength</option>
-              <option>Mobility</option>
-              <option>Other</option>
+              <option>Walk</option><option>Run</option><option>Bike</option><option>Strength</option><option>Mobility</option><option>Other</option>
             </select>
           </div>
           <div style="width:120px">
@@ -132,11 +178,7 @@
           </div>
           <div style="width:140px">
             <label>Intensity</label>
-            <select id="intensity">
-              <option>Easy</option>
-              <option>Moderate</option>
-              <option>Hard</option>
-            </select>
+            <select id="intensity"><option>Easy</option><option>Moderate</option><option>Hard</option></select>
           </div>
         </div>
         <label>Notes</label>
@@ -149,26 +191,18 @@
           <span class="pill" id="levelTag">Level 1</span>
         </div>
         <div class="badges" id="badges"></div>
-        <div class="section-title" style="margin-top:16px">
-          <h2>Integrations</h2>
+        <div class="shelf">
+          <div class="levelbar"><div id="levelFill"></div></div>
+          <span class="pill" id="levelPct">0%</span>
         </div>
-        <div class="row" id="stravaBox">
-          <button class="btn small" id="connectStrava">Connect Strava</button>
-          <button class="btn small ghost" id="importStrava" disabled>Import last 30 days</button>
-          <button class="btn small ghost right" id="disconnectStrava" disabled>Disconnect</button>
-          <div class="hint" id="stravaStatus">Not connected</div>
-        </div>
+
         <div class="section-title" style="margin-top:16px">
           <h2>Settings</h2>
         </div>
         <div class="row">
           <label for="weeklyGoal" style="margin:0">Weekly goal</label>
           <select id="weeklyGoal">
-            <option value="3">3 days</option>
-            <option value="4">4 days</option>
-            <option value="5" selected>5 days</option>
-            <option value="6">6 days</option>
-            <option value="7">7 days</option>
+            <option value="3">3 days</option><option value="4">4 days</option><option value="5" selected>5 days</option><option value="6">6 days</option><option value="7">7 days</option>
           </select>
           <button class="btn small right" id="resetBtn">Reset All</button>
         </div>
@@ -177,25 +211,19 @@
 
     <section class="card" style="margin-top:16px">
       <div class="section-title">
-        <h2>Last 30 Days</h2>
-        <div style="width:220px" class="row">
-          <div class="progress" style="flex:1"><div id="weeklyProgress"></div></div>
-          <span class="pill" id="progressLabel">0%</span>
-        </div>
+        <h2>Last 90 Days (heatmap)</h2>
+        <span class="pill" id="heatHelp">Darker = longer/harder</span>
       </div>
-      <div class="calendar" id="calendar"></div>
+      <div class="heatmap" id="heatmap"></div>
     </section>
 
     <section class="card" style="margin-top:16px">
-      <div class="section-title">
-        <h2>Log</h2>
-      </div>
+      <div class="section-title"><h2>Log</h2></div>
       <div id="log"></div>
     </section>
 
     <div class="footer">
-      <p>💪 Built to make consistency feel rewarding. Your data stays in your browser (local only).
-        When connected to Strava, tokens stay on your device and are used only to fetch your activities.</p>
+      <p>💪 Visuals Wave 1: ring + heatmap + confetti + toasts + badge shelf. Data stays local.</p>
     </div>
   </div>
 
@@ -205,10 +233,11 @@
   const fmt = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const iso = (d) => fmt(d).toISOString().slice(0,10);
   const today = fmt(new Date());
-  const storeKey = "streakstacker.v2";
+  const storeKey = "streakstacker.v3";
   const state = load();
-  let deferredPrompt = null;
 
+  // --- Install prompt
+  let deferredPrompt=null;
   window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; $('#installBtn').disabled = false; });
   $('#installBtn').addEventListener('click', async () => {
     if(!deferredPrompt){ alert('Already installed or not supported.'); return; }
@@ -216,108 +245,167 @@
     if(outcome === 'accepted'){ $('#installBtn').textContent = 'Installed'; } deferredPrompt = null;
   });
 
-  function load(){ try { const raw = localStorage.getItem(storeKey); return raw ? JSON.parse(raw) : { days:{}, points:0, best:0, weeklyGoal:5, reminder:null, logs:[], strava:null }; } catch(e){ return { days:{}, points:0, best:0, weeklyGoal:5, reminder:null, logs:[], strava:null }; } }
+  function load(){
+    try{ const raw = localStorage.getItem(storeKey);
+      return raw ? JSON.parse(raw) : { days:{}, points:0, best:0, weeklyGoal:5, reminder:null, logs:[] };
+    } catch(e){ return { days:{}, points:0, best:0, weeklyGoal:5, reminder:null, logs:[] }; }
+  }
   function save(){ localStorage.setItem(storeKey, JSON.stringify(state)); }
   function dayDone(dateISO){ return !!state.days[dateISO]; }
 
-  function calcStreak(){ let d = new Date(); let streak = 0; while(true){ const key = iso(d); if(state.days[key]){ streak++; d.setDate(d.getDate()-1); } else{ break; } } return streak; }
-  function countThisWeek(){ const d = new Date(); const day = d.getDay(); const start = new Date(d); start.setDate(d.getDate() - day); let c = 0; for(let i=0;i<7;i++){ const k = iso(new Date(start.getFullYear(), start.getMonth(), start.getDate()+i)); if(state.days[k]) c++; } return c; }
-  function countThisMonth(){ const d = new Date(); const start = new Date(d.getFullYear(), d.getMonth(), 1); const end = new Date(d.getFullYear(), d.getMonth()+1, 0); let c = 0; for(let i=0;i<end.getDate();i++){ const k = iso(new Date(start.getFullYear(), start.getMonth(), start.getDate()+i)); if(state.days[k]) c++; } return c; }
-  function pointsForEntry(mins, intensity){ const base = 10; const dur = Math.min(50, Math.max(0, Number(mins)||0)); const bonus = Math.floor(dur/10)*2; const intMul = intensity==='Hard'? 6 : intensity==='Moderate'? 3 : 1; return base + bonus + intMul; }
-
-  function render(){
-    const streak = calcStreak(); $('#streakCount').textContent = streak; $('#streakEmoji').textContent = streak >= 21 ? '🔥' : streak >= 7 ? '✨' : '🌱';
-    $('#bestStreak').textContent = state.best || 0; $('#points').textContent = state.points || 0;
-    const tw = countThisWeek(); $('#thisWeek').textContent = `${tw}/${state.weeklyGoal}`; $('#monthDays').textContent = countThisMonth();
-    $('#weeklyGoal').value = String(state.weeklyGoal); $('#reminderTime').value = state.reminder || '';
-    const pct = Math.min(100, Math.round((tw/Math.max(1,state.weeklyGoal))*100)); $('#weeklyProgress').style.width = pct+'%'; $('#progressLabel').textContent = pct+'%'; $('#weeklyLabel').textContent = `Weekly goal`;
-    const cal = $('#calendar'); cal.innerHTML=''; for(let i=29;i>=0;i--){ const d = new Date(); d.setDate(today.getDate()-i); const key = iso(d); const cell = document.createElement('div'); cell.className='cell'; cell.dataset.done = dayDone(key); cell.title = key + (state.days[key] ? ' ✓' : ''); cell.innerHTML = `<span class="d">${d.getDate()}</span>${state.days[key]?'<span class="dot"></span>':''}`; cal.appendChild(cell); }
-    const b = $('#badges'); b.innerHTML=''; const badges = []; if((state.days[iso(today)])) badges.push(['Today ✅','You showed up.']); if((streak)>=3) badges.push(['3-day Streak','Momentum!']); if((streak)>=7) badges.push(['7-day Streak','One full week.']); if((streak)>=14) badges.push(['14-day Streak','Fortnight flex.']); if((streak)>=21) badges.push(['21-day Streak','Habit installed.']); if((state.points)>=500) badges.push(['500 pts','Halfway to 1k.']); if((state.points)>=1000) badges.push(['1,000 pts','You monster.']); if(badges.length===0){ b.innerHTML = '<div class="empty">No badges yet — let\'s earn some.</div>'; } else { badges.forEach(([t,s])=>{ const el = document.createElement('div'); el.className='badge'; el.innerHTML = `<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2l2.39 4.84 5.34.78-3.86 3.77.91 5.33L12 14.77 6.22 16.72l.91-5.33L3.27 7.62l5.34-.78L12 2z"></path></svg> <strong>${t}</strong>`; el.title = s; b.appendChild(el); }); }
-    const log = $('#log'); log.innerHTML=''; if(!state.logs.length){ log.innerHTML = '<div class="empty">No entries yet.</div>'; } else { state.logs.slice().reverse().forEach(item => { const el = document.createElement('div'); el.className='log-item'; el.innerHTML = `<div class="row"><strong>${item.date}</strong> <span class="pill">${item.type}</span> <span class="pill">${item.minutes} min</span> <span class="pill">${item.intensity}</span> <span class="right pill">+${item.points} pts</span></div><div>${item.notes?item.notes:'<span class="muted">No notes</span>'}</div>`; log.appendChild(el); }); }
-    const lvl = Math.floor((state.points||0)/250)+1; $('#levelTag').textContent = `Level ${lvl}`;
-    const connected = !!(state.strava && state.strava.access_token && state.strava.expires_at*1000 > Date.now()); $('#importStrava').disabled = !connected; $('#disconnectStrava').disabled = !connected; $('#stravaStatus').textContent = connected ? 'Strava connected' : 'Not connected';
+  function calcStreak(){
+    let d = new Date(); let streak = 0;
+    while(true){ const key = iso(d); if(state.days[key]){ streak++; d.setDate(d.getDate()-1); } else break; }
+    return streak;
   }
-
+  function countThisWeek(){
+    const d = new Date(); const day = d.getDay(); const start = new Date(d); start.setDate(d.getDate() - day);
+    let c = 0; for(let i=0;i<7;i++){ const k = iso(new Date(start.getFullYear(), start.getMonth(), start.getDate()+i)); if(state.days[k]) c++; } return c;
+  }
+  function countThisMonth(){
+    const d = new Date(); const start = new Date(d.getFullYear(), d.getMonth(), 1); const end = new Date(d.getFullYear(), d.getMonth()+1, 0);
+    let c = 0; for(let i=0;i<end.getDate();i++){ const k = iso(new Date(start.getFullYear(), start.getMonth(), start.getDate()+i)); if(state.days[k]) c++; } return c;
+  }
+  function pointsForEntry(mins, intensity){
+    const base = 10; const dur = Math.min(50, Math.max(0, Number(mins)||0)); const bonus = Math.floor(dur/10)*2;
+    const intMul = intensity==='Hard'? 6 : intensity==='Moderate'? 3 : 1; return base + bonus + intMul;
+  }
   function addEntry(dateISO, minutes, intensity, type, notes){
     if(state.days[dateISO]) return false;
     const pts = pointsForEntry(minutes, intensity);
     state.days[dateISO] = { minutes:Number(minutes)||0, intensity, type, notes, points:pts };
     state.points = (state.points || 0) + pts;
     state.logs.push({date:dateISO, type, minutes:Number(minutes)||0, intensity, notes, points:pts});
-    const streak = calcStreak(); if(streak > (state.best||0)) state.best = streak; return true;
+    const streak = calcStreak(); if(streak > (state.best||0)) state.best = streak;
+    return true;
   }
+
+  // Confetti (tiny)
+  const confetti = (()=>{
+    const cvs = $('#confetti'); const ctx = cvs.getContext('2d'); let w=0,h=0;
+    const parts = []; const N=120;
+    function resize(){ w=window.innerWidth; h=window.innerHeight; cvs.width=w; cvs.height=h; }
+    function spawn(){ parts.length=0; for(let i=0;i<N;i++){ parts.push({x:Math.random()*w, y:-10-Math.random()*h*.5, vx:(Math.random()-.5)*2, vy:2+Math.random()*3, r:2+Math.random()*3, a:1}); } }
+    function tick(){ ctx.clearRect(0,0,w,h); parts.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy*=0.99; p.a-=0.004; ctx.globalAlpha=Math.max(0,p.a); ctx.fillStyle = (Math.random()<.5)?'#60A5FA':'#34D399'; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }); requestAnimationFrame(tick); }
+    window.addEventListener('resize', resize); resize(); tick();
+    return { burst(){ spawn(); setTimeout(()=>{parts.forEach(p=>p.a=0)},3000); } };
+  })();
+
+  // Toasts
+  function toast(msg){ const t = document.createElement('div'); t.className='toast'; t.textContent = msg; $('#toasts').appendChild(t); setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateY(-4px)'; setTimeout(()=> t.remove(), 400); }, 2600); }
+
+  function render(){
+    const streak = calcStreak();
+    $('#streakCount').textContent = streak;
+    $('#streakEmoji').textContent = streak >= 21 ? '🔥' : streak >= 7 ? '✨' : '🌱';
+    $('#bestStreak').textContent = state.best || 0;
+    $('#points').textContent = state.points || 0;
+    const tw = countThisWeek();
+    const goal = state.weeklyGoal;
+    $('#thisWeek').textContent = `${tw}/${goal}`;
+    $('#monthDays').textContent = countThisMonth();
+    $('#weeklyGoal').value = String(goal);
+
+    // Header meter + ring
+    const pct = Math.min(100, Math.round((tw/Math.max(1,goal))*100));
+    $('#hdrMeterBar').style.width = pct+'%';
+    $('#weeklyLabel').textContent = `Weekly goal — ${pct}%`;
+    $('#ringNow').textContent = tw; $('#ringGoal').textContent = goal;
+    const C = 2*Math.PI*48; const len = Math.round((pct/100)*C);
+    $('#ringArc').setAttribute('stroke-dasharray', `${len} ${C}`);
+
+    // Badges + level bar
+    const b = $('#badges'); b.innerHTML='';
+    const badges = [];
+    const todayKey = iso(today);
+    if(state.days[todayKey]) badges.push(['Today ✅','You showed up.']);
+    if(streak>=3) badges.push(['3‑day Streak','Momentum!']);
+    if(streak>=7) badges.push(['7‑day Streak','One week!']);
+    if(streak>=14) badges.push(['14‑day Streak','Fortnight flex.']);
+    if(streak>=21) badges.push(['21‑day Streak','Habit installed.']);
+    if((state.points)>=500) badges.push(['500 pts','Halfway to 1k.']);
+    if((state.points)>=1000) badges.push(['1,000 pts','Monster.']);
+    if(!badges.length){ b.innerHTML = '<div class="empty">No badges yet — let\'s earn some.</div>'; }
+    else{
+      badges.forEach(([t,s])=>{ const el=document.createElement('div'); el.className='badge'; el.innerHTML=`<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path fill="currentColor" d="M12 2l2.39 4.84 5.34.78-3.86 3.77.91 5.33L12 14.77 6.22 16.72l.91-5.33L3.27 7.62l5.34-.78L12 2z"></path></svg> <strong>${t}</strong>`; el.title=s; b.appendChild(el); });
+    }
+    const lvl = Math.floor((state.points||0)/250)+1;
+    $('#levelTag').textContent = `Level ${lvl}`;
+    const toNext = (state.points||0)%250; const pctLvl = Math.min(100, Math.round((toNext/250)*100));
+    $('#levelFill').style.width = pctLvl+'%'; $('#levelPct').textContent = pctLvl+'%'
+
+    // Heatmap 90 days
+    const HM = $('#heatmap'); HM.innerHTML='';
+    const days = [];
+    for(let i=89;i>=0;i--){ const d=new Date(); d.setDate(today.getDate()-i); days.push(d); }
+    for(let i=0;i<90;i++){
+      const d = days[i]; const k = iso(d);
+      const entry = state.days[k];
+      const mins = entry ? (entry.minutes||0) : 0;
+      const intensity = entry ? entry.intensity : null;
+      const lvl = entry ? (mins>=45?4:mins>=30?3:mins>=20?2:1) : 0;
+      const cell = document.createElement('div'); cell.className='hm-cell'; cell.dataset.lvl = String(lvl);
+      cell.dataset.tip = entry ? `${k} — ${entry.type} • ${mins} min • ${intensity}` : `${k} — no workout`;
+      HM.appendChild(cell);
+    }
+
+    // Log
+    const log = $('#log'); log.innerHTML='';
+    if(!state.logs.length){ log.innerHTML = '<div class="empty">No entries yet.</div>'; }
+    else{
+      state.logs.slice().reverse().forEach(item => {
+        const el=document.createElement('div'); el.className='log-item';
+        el.innerHTML = `<div class="row"><strong>${item.date}</strong> <span class="pill">${item.type}</span> <span class="pill">${item.minutes} min</span> <span class="pill">${item.intensity}</span> <span class="right pill">+${item.points} pts</span></div><div>${item.notes?item.notes:'<span class="muted">No notes</span>'}</div>`;
+        log.appendChild(el);
+      });
+    }
+  }
+
   function addToday(){
-    const key = iso(today); if(state.days[key]){ alert('Already logged for today. You can undo if needed.'); return; }
-    const minutes = $('#minutes').value || 0; const intensity = $('#intensity').value; const type = $('#type').value; const notes = $('#notes').value.trim();
-    if(addEntry(key, minutes, intensity, type, notes)){ save(); render(); maybeNotify('Nice work!', `You kept your streak alive.`); }
+    const key = iso(today);
+    if(state.days[key]){ alert('Already logged for today. You can undo if needed.'); return; }
+    const minutes = $('#minutes').value || 0;
+    const intensity = $('#intensity').value;
+    const type = $('#type').value;
+    const notes = $('#notes').value.trim();
+    const ok = addEntry(key, minutes, intensity, type, notes);
+    if(ok){
+      save(); render();
+      const streak = calcStreak();
+      if(streak===1) toast('Day 1 — nice start!');
+      if([7,14,21].includes(streak)){ toast(`${streak}-day streak!`); confetti.burst(); }
+      if((state.points||0) >= 1000 && (state.points||0)-pointsForEntry(minutes,intensity) < 1000){ toast('1,000 points!'); confetti.burst(); }
+    }
   }
   function undoToday(){
     const key = iso(today); if(!state.days[key]){ alert('Nothing to undo for today.'); return; }
     const pts = state.days[key].points || 0; delete state.days[key]; state.points = Math.max(0, (state.points||0) - pts);
-    for(let i = state.logs.length - 1; i >= 0; i--){ if(state.logs[i].date === key){ state.logs.splice(i,1); break; } } save(); render();
+    for(let i = state.logs.length - 1; i >= 0; i--){ if(state.logs[i].date === key){ state.logs.splice(i,1); break; } }
+    save(); render();
   }
-  function setWeeklyGoal(v){ state.weeklyGoal = Number(v)||5; save(); render(); }
-  function exportData(){ const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'streakstacker-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+  function exportData(){ const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'}); const url = URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='streakstacker-export.json'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
   function importData(){
-    const inp = document.createElement('input'); inp.type='file'; inp.accept='.json,application/json'; inp.onchange = () => {
-      const file = inp.files[0]; if(!file) return; const fr = new FileReader(); fr.onload = () => { try{ const obj = JSON.parse(fr.result); if(!obj.days) throw new Error('Invalid'); Object.assign(state, obj); save(); render(); } catch(e){ alert('Invalid file.'); } }; fr.readAsText(file);
+    const inp=document.createElement('input'); inp.type='file'; inp.accept='.json,application/json'; inp.onchange=()=>{
+      const f=inp.files[0]; if(!f) return; const fr=new FileReader(); fr.onload=()=>{ try{ const obj=JSON.parse(fr.result); if(!obj.days) throw new Error('Invalid'); Object.assign(state, obj); save(); render(); } catch(e){ alert('Invalid file.'); } }; fr.readAsText(f);
     }; inp.click();
   }
-  function resetAll(){ if(confirm('This will delete all your local data. Continue?')){ localStorage.removeItem(storeKey); Object.assign(state, { days:{}, points:0, best:0, weeklyGoal:5, reminder:null, logs:[], strava:null }); render(); } }
-  async function enableNotif(){ if(!('Notification' in window)) return false; if(Notification.permission === 'granted') return true; if(Notification.permission === 'denied') return false; const perm = await Notification.requestPermission(); return perm === 'granted'; }
-  function maybeNotify(title, body){ if(!('Notification' in window)) return; if(Notification.permission !== 'granted') return; new Notification(title, { body }); }
-  function tickReminder(){ if(!state.reminder) return; const now = new Date(); const [hh, mm] = state.reminder.split(':').map(Number); if(now.getHours() === hh && now.getMinutes() === mm){ if(!dayDone(iso(today))){ maybeNotify('Time to move', 'Quick check-in: knock out your workout and keep the streak alive.'); } } }
+  function resetAll(){ if(confirm('This will delete all your local data. Continue?')){ localStorage.removeItem(storeKey); Object.assign(state, { days:{}, points:0, best:0, weeklyGoal:5, reminder:null, logs:[] }); render(); } }
+  async function enableNotif(){ if(!('Notification' in window)) return false; if(Notification.permission==='granted') return true; if(Notification.permission==='denied') return false; const p=await Notification.requestPermission(); return p==='granted'; }
+  function maybeNotify(title,body){ if(!('Notification' in window)) return; if(Notification.permission!=='granted') return; new Notification(title,{body}); }
+  function tickReminder(){ if(!state.reminder) return; const now=new Date(); const [hh,mm]=state.reminder.split(':').map(Number); if(now.getHours()===hh && now.getMinutes()===mm){ if(!dayDone(iso(today))){ maybeNotify('Time to move','Quick check-in: keep the streak alive.'); } } }
   setInterval(tickReminder, 60000);
 
-  function getSiteBase(){ return window.location.origin; }
-  function getRedirectURI(){ return getSiteBase() + '/'; }
-  function stravaAuthURL(clientId){ const scope = 'read,activity:read_all'; const redirect = encodeURIComponent(getRedirectURI()); return `https://www.strava.com/oauth/authorize?client_id=${clientId}&response_type=code&redirect_uri=${redirect}&approval_prompt=auto&scope=${encodeURIComponent(scope)}`; }
-  async function exchangeCode(code){
-    const res = await fetch('/.netlify/functions/strava-token', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ code, redirect_uri: getRedirectURI() }) });
-    if(!res.ok){ throw new Error('Token exchange failed'); }
-    const data = await res.json(); state.strava = data; save(); render();
-  }
-  async function refreshTokenIfNeeded(){
-    if(!state.strava) return false;
-    if(state.strava.expires_at*1000 > Date.now()+60000) return true;
-    const res = await fetch('/.netlify/functions/strava-token', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ refresh_token: state.strava.refresh_token, grant_type: 'refresh_token' }) });
-    if(!res.ok){ return false; } const data = await res.json(); state.strava = data; save(); return true;
-  }
-  async function importRecentStrava(){
-    const ok = await refreshTokenIfNeeded(); if(!ok){ alert('Strava not connected.'); return; }
-    const after = Math.floor((Date.now() - 30*24*60*60*1000)/1000);
-    const res = await fetch(`https://www.strava.com/api/v3/athlete/activities?after=${after}&per_page=200`, { headers: { Authorization: `Bearer ${state.strava.access_token}` } });
-    if(!res.ok){ alert('Failed to fetch activities.'); return; }
-    const activities = await res.json();
-    let added = 0;
-    activities.forEach(act => {
-      const start = new Date(act.start_date_local || act.start_date);
-      const key = iso(start);
-      const mins = Math.round((act.elapsed_time || 0)/60);
-      const sport = act.type || act.sport_type || 'Other';
-      const intensity = mins >= 45 ? 'Hard' : mins >= 25 ? 'Moderate' : 'Easy';
-      const notes = `${sport}${act.name ? ' — '+act.name : ''}`;
-      if(addEntry(key, mins || 20, intensity, sport, notes)) added++;
-    });
-    save(); render(); alert(`Imported ${added} day(s) from Strava.`);
-  }
-  function disconnectStrava(){ if(confirm('Disconnect Strava? Tokens will be removed from this device.')){ state.strava = null; save(); render(); } }
-  (function handleRedirect(){ const params = new URLSearchParams(window.location.search); const code = params.get('code'); if(code){ exchangeCode(code).then(()=>{ const url = new URL(window.location.href); url.searchParams.delete('code'); url.searchParams.delete('scope'); url.searchParams.delete('state'); window.history.replaceState({}, '', url.toString()); }).catch(()=> alert('Failed to connect to Strava.')); } })();
-
-  $('#completeTodayBtn').addEventListener('click', addToday);
-  $('#undoBtn').addEventListener('click', undoToday);
-  $('#weeklyGoal').addEventListener('change', (e)=> setWeeklyGoal(e.target.value));
-  $('#exportBtn').addEventListener('click', exportData);
-  $('#importBtn').addEventListener('click', importData);
-  $('#resetBtn').addEventListener('click', resetAll);
-  $('#saveReminder').addEventListener('click', async ()=>{ const t = $('#reminderTime').value; if(!t){ state.reminder=null; save(); render(); return; } const ok = await enableNotif(); if(!ok){ alert('Notifications are blocked by your browser.'); } state.reminder = t; save(); render(); });
-  $('#connectStrava').addEventListener('click', ()=>{ fetch('/.netlify/functions/strava-token?client_id=1').then(r=>r.json()).then(({client_id})=>{ if(!client_id){ alert('Server not configured.'); return; } window.location.href = stravaAuthURL(client_id); }).catch(()=> alert('Server not configured.')); });
-  $('#importStrava').addEventListener('click', importRecentStrava);
-  $('#disconnectStrava').addEventListener('click', disconnectStrava);
+  document.getElementById('completeTodayBtn').addEventListener('click', addToday);
+  document.getElementById('undoBtn').addEventListener('click', undoToday);
+  document.getElementById('weeklyGoal').addEventListener('change', (e)=>{ state.weeklyGoal = Number(e.target.value)||5; save(); render(); });
+  document.getElementById('exportBtn').addEventListener('click', exportData);
+  document.getElementById('importBtn').addEventListener('click', importData);
+  document.getElementById('resetBtn').addEventListener('click', resetAll);
+  document.getElementById('saveReminder').addEventListener('click', async ()=>{ const t=document.getElementById('reminderTime').value; if(!t){ state.reminder=null; save(); render(); return; } const ok=await enableNotif(); if(!ok){ alert('Notifications are blocked by your browser.'); } state.reminder=t; save(); render(); });
 
   render();
 })();
 </script>
-
 </body>
 </html>
